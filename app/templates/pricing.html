@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block header %}Pricing{% endblock %}
+
+{% block content %}
+<div class="min-h-[80vh] flex flex-col items-center justify-center px-4" id="mainContent" style="display: none">
+    <div class="max-w-7xl mx-auto">
+        <!-- Pricing Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Basic Plan -->
+            <div class="bg-white rounded-2xl shadow-sm p-8">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Basic</h3>
+                <div class="flex items-baseline mb-8">
+                    <span class="text-4xl font-bold text-gray-900">$25</span>
+                    <span class="text-gray-500 ml-2">/mo</span>
+                </div>
+                <ul class="space-y-4 mb-8">
+                    <li class="flex items-center text-gray-600">
+                        <svg class="w-5 h-5 text-mint-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        5,000 API calls/month
+                    </li>
+                    <li class="flex items-center text-gray-600">
+                        <svg class="w-5 h-5 text-mint-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        99% uptime
+                    </li>
+                    <li class="flex items-center text-gray-600">
+                        <svg class="w-5 h-5 text-mint-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Pre-built code
+                    </li>
+                    <li class="flex items-center text-gray-600">
+                        <svg class="w-5 h-5 text-mint-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        No-code integrations
+                    </li>
+                </ul>
+                <button class="w-full py-3 px-6 bg-mint-100 text-mint-500 rounded-xl font-medium hover:bg-mint-200 transition-colors">
+                    Get started
+                </button>
+            </div>
+
+            <!-- Premium Plan -->
+            <div class="bg-white rounded-2xl shadow-sm p-8 relative border-2 border-mint-500">
+                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <span class="bg-mint-500 text-white px-4 py-1 rounded-full text-sm font-medium">Most Popular</span>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Premium</h3>
+                <div class="flex items-baseline mb-8">
+                    <span class="text-4xl font-bold text-gray-900">$99</span>
+                    <span class="text-gray-500 ml-2">/mo</span>
+                </div>
+                <ul class="space-y-4 mb-8">
+                    <li class="flex items-center text-gray-600">
+                        <svg class="w-5 h-5 text-mint-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        20,000 API calls/month
+                    </li>
+                    <li class="flex items-center text-gray-600">
+                        <svg class="w-5 h-5 text-mint-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Everything in Basic
+                    </li>
+                    <li class="flex items-center text-gray-600">
+                        <svg class="w-5 h-5 text-mint-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Priority support
+                    </li>
+                    <li class="flex items-center text-gray-600">
+                        <svg class="w-5 h-5 text-mint-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Access to Beta testing
+                    </li>
+                </ul>
+                <button class="w-full py-3 px-6 bg-mint-500 text-white rounded-xl font-medium hover:bg-mint-600 transition-colors">
+                    Get started
+                </button>
+            </div>
+
+            <!-- Enterprise Plan -->
+            <div class="bg-white rounded-2xl shadow-sm p-8">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Enterprise</h3>
+                <div class="flex items-baseline mb-8">
+                    <span class="text-4xl font-bold text-gray-900">$997</span>
+                    <span class="text-gray-500 ml-2">/mo</span>
+                </div>
+                <ul class="space-y-4 mb-8">
+                    <li class="flex items-center text-gray-600">
+                        <svg class="w-5 h-5 text-mint-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        250,000+ API calls
+                    </li>
+                    <li class="flex items-center text-gray-600">
+                        <svg class="w-5 h-5 text-mint-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Everything in Premium
+                    </li>
+                    <li class="flex items-center text-gray-600">
+                        <svg class="w-5 h-5 text-mint-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Scalable pricing
+                    </li>
+                    <li class="flex items-center text-gray-600">
+                        <svg class="w-5 h-5 text-mint-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Custom software
+                    </li>
+                </ul>
+                <a href="https://linkedin.com/in/dimondev/" target="_blank" rel="noopener"
+                    class="w-full py-3 px-6 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition-colors flex items-center justify-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                    </svg>
+                    Talk to Founder
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

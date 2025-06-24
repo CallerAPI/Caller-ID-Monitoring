@@ -1,0 +1,420 @@
+{% extends "base.html" %}
+
+{% block header %}Settings{% endblock %}
+
+{% block content %}
+<div class="space-y-8" id="mainContent" style="display: none">
+    <!-- Account Settings -->
+    <div class="bg-white rounded-2xl shadow-sm">
+        <div class="px-6 pt-6 pb-4 border-b border-gray-100">
+            <h2 class="text-lg font-semibold text-gray-800">CallerAPI Account</h2>
+        </div>
+        <div class="p-6 space-y-6">
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input type="email" id="accountEmail" readonly
+                        class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-600">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">API Key</label>
+                    <div class="relative">
+                        <input type="password" id="apiKey" readonly
+                            class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-600 pr-24">
+                        <button onclick="toggleApiKeyVisibility()" 
+                            class="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-mint-500 hover:text-mint-600">
+                            Show/Hide
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center justify-between pt-4">
+                <div>
+                    <h3 class="text-sm font-medium text-gray-700">API Credits</h3>
+                    <div class="mt-1 flex items-baseline space-x-2">
+                        <span class="text-2xl font-bold text-gray-900" id="creditsLeft">--</span>
+                        <span class="text-sm text-gray-500">remaining of</span>
+                        <span class="text-lg font-medium text-gray-700" id="creditsMonthly">--</span>
+                    </div>
+                </div>
+                <a href="/pricing"
+                    class="px-6 py-2 bg-mint-500 text-white rounded-lg font-medium hover:bg-mint-600 transition-colors">
+                    Upgrade Plan
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications -->
+    <div class="bg-white rounded-2xl shadow-sm">
+        <div class="px-6 pt-6 pb-4 border-b border-gray-100">
+            <h2 class="text-lg font-semibold text-gray-800">Notifications (Additional Charges)</h2>
+        </div>
+        <div class="p-6">
+            <div class="space-y-4">
+                <!-- Email Alerts -->
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-700">Email Alerts</h3>
+                        <p class="text-sm text-gray-500">Get notified when a number is marked as spam</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="emailAlerts" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-mint-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-mint-500"></div>
+                    </label>
+                </div>
+
+                <!-- Slack -->
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-700">Slack Integration</h3>
+                        <p class="text-sm text-gray-500">Send alerts to your Slack workspace</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="slackNotifs" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-mint-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-mint-500"></div>
+                    </label>
+                </div>
+                <div id="slackConfig" class="hidden mt-4 pl-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Webhook URL</label>
+                        <input type="url" id="slackWebhookUrl" placeholder="https://hooks.slack.com/services/..."
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mint-100 focus:border-mint-500 outline-none">
+                    </div>
+                </div>
+
+                <!-- Discord -->
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-700">Discord Integration</h3>
+                        <p class="text-sm text-gray-500">Send alerts to your Discord server</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="discordNotifs" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-mint-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-mint-500"></div>
+                    </label>
+                </div>
+                <div id="discordConfig" class="hidden mt-4 pl-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Webhook URL</label>
+                        <input type="url" id="discordWebhookUrl" placeholder="https://discord.com/api/webhooks/..."
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mint-100 focus:border-mint-500 outline-none">
+                    </div>
+                </div>
+
+                <!-- Telegram -->
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-700">Telegram Integration</h3>
+                        <p class="text-sm text-gray-500">Send alerts to your Telegram channel</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="telegramNotifs" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-mint-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-mint-500"></div>
+                    </label>
+                </div>
+                <div id="telegramConfig" class="hidden mt-4 pl-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Chat ID</label>
+                        <input type="text" id="telegramChatId" placeholder="@yourchannel or -100123456789"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mint-100 focus:border-mint-500 outline-none">
+                        <p class="mt-1 text-xs text-gray-500">Contact <a href="https://t.me/CallerAPIBot" target="_blank" class="text-mint-500 hover:text-mint-600">@CallerAPIBot</a> to get started</p>
+                    </div>
+                </div>
+
+                <!-- Custom Webhook -->
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-700">Custom Integration</h3>
+                        <p class="text-sm text-gray-500">Connect to your own systems (dialer, CRM, etc.)</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="webhookNotifs" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-mint-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-mint-500"></div>
+                    </label>
+                </div>
+                <div id="webhookConfig" class="hidden mt-4 pl-6">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Webhook URL</label>
+                            <input type="url" id="webhookUrl" placeholder="https://your-domain.com/webhook"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mint-100 focus:border-mint-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Secret Key</label>
+                            <div class="relative">
+                                <input type="password" id="webhookSecret"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mint-100 focus:border-mint-500 outline-none pr-24">
+                                <button onclick="regenerateWebhookSecret()" 
+                                    class="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-mint-500 hover:text-mint-600">
+                                    Regenerate
+                                </button>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">Contact us for custom integration options</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Load all settings
+    async function loadSettings() {
+        try {
+            // Single /me request to get account info and check auth
+            const response = await fetch('/api/v1/me');
+            if (response.status === 401) {
+                document.getElementById('onboardingModal').classList.remove('hidden');
+                document.getElementById('mainContent').style.display = 'none';
+                return;
+            }
+            
+            const data = await response.json();
+            
+            // Update account info
+            document.getElementById('accountEmail').value = data.email;
+            document.getElementById('apiKey').value = data.api_key;
+            document.getElementById('creditsLeft').textContent = data.credits_left.toLocaleString();
+            document.getElementById('creditsMonthly').textContent = data.credits_monthly.toLocaleString();
+            
+            // Show main content
+            document.getElementById('mainContent').style.display = 'block';
+            
+            // Load notification settings
+            await loadNotificationSettings();
+            
+        } catch (error) {
+            console.error('Failed to load settings:', error);
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('onboardingModal').classList.remove('hidden');
+        }
+    }
+
+    // Load notification settings
+    async function loadNotificationSettings() {
+        try {
+            const response = await fetch('/api/v1/settings/notifications');
+            if (!response.ok) {
+                throw new Error('Failed to load notification settings');
+            }
+            
+            const settings = await response.json();
+            
+            // Update toggles
+            document.getElementById('emailAlerts').checked = settings.notify_email;
+            document.getElementById('slackNotifs').checked = settings.notify_slack;
+            document.getElementById('discordNotifs').checked = settings.notify_discord;
+            document.getElementById('telegramNotifs').checked = settings.notify_telegram;
+            document.getElementById('webhookNotifs').checked = settings.notify_webhook;
+            
+            // Update input fields
+            document.getElementById('slackWebhookUrl').value = settings.slack_webhook_url;
+            document.getElementById('discordWebhookUrl').value = settings.discord_webhook_url;
+            document.getElementById('telegramChatId').value = settings.telegram_chat_id;
+            document.getElementById('webhookUrl').value = settings.webhook_url;
+            
+            // Update visibility of config sections
+            document.getElementById('slackConfig').style.display = settings.notify_slack ? 'block' : 'none';
+            document.getElementById('discordConfig').style.display = settings.notify_discord ? 'block' : 'none';
+            document.getElementById('telegramConfig').style.display = settings.notify_telegram ? 'block' : 'none';
+            document.getElementById('webhookConfig').style.display = settings.notify_webhook ? 'block' : 'none';
+        } catch (error) {
+            console.error('Failed to load notification settings:', error);
+        }
+    }
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', loadSettings);
+
+    // Toggle API key visibility
+    function toggleApiKeyVisibility() {
+        const input = document.getElementById('apiKey');
+        input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    // Regenerate API key
+    async function regenerateApiKey() {
+        if (!confirm('Are you sure you want to regenerate your API key? Your existing key will stop working immediately.')) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/v1/auth/regenerate', {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('apiKey').value = data.api_key;
+                alert('API key regenerated successfully');
+            } else {
+                const error = await response.json();
+                throw new Error(error.detail || 'Failed to regenerate API key');
+            }
+        } catch (error) {
+            console.error('Failed to regenerate API key:', error);
+            alert(error.message);
+        }
+    }
+
+    // Save monitoring settings
+    async function saveMonitoringSettings() {
+        const frequency = parseInt(document.getElementById('defaultFrequency').value);
+        const threshold = parseInt(document.getElementById('spamThreshold').value);
+
+        if (frequency < 1 || frequency > 1440) {
+            alert('Frequency must be between 1 and 1440 minutes');
+            return;
+        }
+
+        if (threshold < 0 || threshold > 100) {
+            alert('Threshold must be between 0 and 100');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/v1/settings/monitoring', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    default_frequency: frequency,
+                    spam_threshold: threshold
+                })
+            });
+
+            if (response.ok) {
+                alert('Settings saved successfully');
+            } else {
+                const error = await response.json();
+                throw new Error(error.detail || 'Failed to save settings');
+            }
+        } catch (error) {
+            console.error('Failed to save settings:', error);
+            alert(error.message);
+        }
+    }
+
+    // Toggle notification configs and save immediately
+    document.getElementById('emailAlerts').addEventListener('change', async function() {
+        await saveNotificationSettings();
+    });
+
+    document.getElementById('slackNotifs').addEventListener('change', async function() {
+        document.getElementById('slackConfig').style.display = this.checked ? 'block' : 'none';
+        await saveNotificationSettings();
+    });
+
+    document.getElementById('discordNotifs').addEventListener('change', async function() {
+        document.getElementById('discordConfig').style.display = this.checked ? 'block' : 'none';
+        await saveNotificationSettings();
+    });
+
+    document.getElementById('telegramNotifs').addEventListener('change', async function() {
+        document.getElementById('telegramConfig').style.display = this.checked ? 'block' : 'none';
+        await saveNotificationSettings();
+    });
+
+    document.getElementById('webhookNotifs').addEventListener('change', async function() {
+        document.getElementById('webhookConfig').style.display = this.checked ? 'block' : 'none';
+        await saveNotificationSettings();
+    });
+
+    // Add change listeners to input fields
+    document.getElementById('slackWebhookUrl').addEventListener('change', saveNotificationSettings);
+    document.getElementById('discordWebhookUrl').addEventListener('change', saveNotificationSettings);
+    document.getElementById('telegramChatId').addEventListener('change', saveNotificationSettings);
+    document.getElementById('webhookUrl').addEventListener('change', saveNotificationSettings);
+
+    // Save notification settings
+    async function saveNotificationSettings() {
+        const settings = {
+            notify_email: document.getElementById('emailAlerts').checked,
+            notify_slack: document.getElementById('slackNotifs').checked,
+            slack_webhook_url: document.getElementById('slackWebhookUrl').value,
+            notify_discord: document.getElementById('discordNotifs').checked,
+            discord_webhook_url: document.getElementById('discordWebhookUrl').value,
+            notify_telegram: document.getElementById('telegramNotifs').checked,
+            telegram_chat_id: document.getElementById('telegramChatId').value,
+            notify_webhook: document.getElementById('webhookNotifs').checked,
+            webhook_url: document.getElementById('webhookUrl').value
+        };
+
+        try {
+            const response = await fetch('/api/v1/settings/notifications', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(settings)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Failed to save settings');
+            }
+        } catch (error) {
+            console.error('Failed to save settings:', error);
+            alert(error.message);
+        }
+    }
+
+    // Regenerate webhook secret
+    async function regenerateWebhookSecret() {
+        if (!confirm('Are you sure you want to regenerate your webhook secret? You will need to update your endpoint configuration.')) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/v1/settings/webhook/regenerate', {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('webhookSecret').value = data.secret;
+                alert('Webhook secret regenerated successfully');
+            } else {
+                const error = await response.json();
+                throw new Error(error.detail || 'Failed to regenerate webhook secret');
+            }
+        } catch (error) {
+            console.error('Failed to regenerate webhook secret:', error);
+            alert(error.message);
+        }
+    }
+
+    async function confirmAccount() {
+        const apiKey = document.getElementById('apiKeyInput').value;
+        try {
+            const response = await fetch('/api/v1/auth/confirm', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ api_key: apiKey })
+            });
+
+            if (response.ok) {
+                // Store API key in settings page
+                document.getElementById('apiKey').value = apiKey;
+                
+                document.getElementById('onboardingModal').classList.add('hidden');
+                if (document.getElementById('mainContent')) {
+                    document.getElementById('mainContent').style.display = 'block';
+                }
+                window.location.reload();
+            } else {
+                const data = await response.json();
+                alert(data.detail || 'Failed to confirm account');
+            }
+        } catch (error) {
+            console.error('Confirmation failed:', error);
+            alert('Failed to confirm account');
+        }
+    }
+</script>
+{% endblock %} 
