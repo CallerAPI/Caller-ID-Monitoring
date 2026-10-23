@@ -1,10 +1,13 @@
+import logging
+from itertools import groupby
+from operator import attrgetter
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
-from sqlalchemy.orm import Session
 from datetime import datetime
 from app.db.base import SessionLocal
 from app.services.caller_api import CallerAPIService
 from app.models.phone_number import PhoneNumber
+from app.models.user import User
 from app.services.notifications import (
     send_email_notification,
     send_slack_notification,
@@ -13,19 +16,40 @@ from app.services.notifications import (
     send_webhook_notification
 )
 
+logger = logging.getLogger(__name__)
+
 # Global scheduler instance
 scheduler = None
-current_api_key = None
 
-def check_phone_number(phone_number_id: int, api_key: str, db: Session):
-    """Check a single phone number's status and send notifications if needed"""
+
+def get_owner_api_key(owner_id: int | None, owner: User | None, number_count: int = 1) -> str | None:
+    """Return the owner's API key, or log a warning and return None when there is none."""
+    if owner_id is None:
+        logger.warning("Skipped monitoring for %s phone numbers: the numbers have no owner.", number_count)
+        return None
+    if owner is None or not owner.api_key:
+        logger.warning(
+            "Skipped monitoring for %s phone numbers of user id=%s: the user has no API key.",
+            number_count,
+            owner_id,
+        )
+        return None
+    return owner.api_key
+
+
+def check_phone_number(phone_number_id: int):
+    """Check a single phone number's status with its owner's API key and send notifications if needed"""
+    db = SessionLocal()
     try:
-        # Get phone number from DB
-        phone_number = db.query(PhoneNumber).filter(PhoneNumber.id == phone_number_id).first()
+        phone_number = db.get(PhoneNumber, phone_number_id)
         if not phone_number or phone_number.disabled:
             return
-            
-        # Check number status using the API key from session
+
+        owner = db.get(User, phone_number.owner_id) if phone_number.owner_id is not None else None
+        api_key = get_owner_api_key(phone_number.owner_id, owner)
+        if api_key is None:
+            return
+
         service = CallerAPIService(api_key=api_key)
         result = service.lookup_number(phone_number.number)
         
@@ -68,11 +92,13 @@ def check_phone_number(phone_number_id: int, api_key: str, db: Session):
                     "event": "spam_status_change" if spam_status_changed else "new_reports"
                 })
         
-        print(f"Checked phone number {phone_number.number}")
+        logger.info("Checked phone number id=%s", phone_number_id)
     except Exception as e:
-        print(f"Error checking phone number {phone_number_id}: {str(e)}")
+        logger.error("Check failed for phone number id=%s: %s", phone_number_id, type(e).__name__)
+    finally:
+        db.close()
 
-def add_job_for_number(phone_number_id: int, frequency: int, api_key: str):
+def add_job_for_number(phone_number_id: int, frequency: int):
     """Add or update a job for a specific phone number"""
     global scheduler
     if not scheduler:
@@ -82,11 +108,11 @@ def add_job_for_number(phone_number_id: int, frequency: int, api_key: str):
     scheduler.add_job(
         check_phone_number,
         trigger=IntervalTrigger(minutes=frequency),
-        args=[phone_number_id, api_key, SessionLocal()],
+        args=[phone_number_id],
         id=job_id,
         replace_existing=True
     )
-    print(f"Added/updated job for phone number {phone_number_id}")
+    logger.info("Added or updated job for phone number id=%s", phone_number_id)
 
 def remove_job_for_number(phone_number_id: int):
     """Remove the job for a specific phone number"""
@@ -95,32 +121,31 @@ def remove_job_for_number(phone_number_id: int):
         job_id = f"monitor_{phone_number_id}"
         try:
             scheduler.remove_job(job_id)
-            print(f"Removed job for phone number {phone_number_id}")
-        except:
+            logger.info("Removed job for phone number id=%s", phone_number_id)
+        except Exception:
             pass  # Job might not exist
 
-def set_api_key(api_key: str):
-    """Set the API key and start monitoring for all active numbers"""
-    global current_api_key, scheduler
-    
-    if api_key == current_api_key:
-        return  # No change needed
-        
-    current_api_key = api_key
-    
-    if not scheduler:
-        init_monitoring()
-    
+def schedule_active_numbers(owner_id: int | None = None) -> int:
+    """Schedule active numbers whose owner has an API key. Limit to one owner when owner_id is set."""
     db = SessionLocal()
     try:
-        # Get all active phone numbers
-        phone_numbers = db.query(PhoneNumber).filter(PhoneNumber.disabled == False).all()
-        
-        # Update/add jobs for all active numbers
-        for number in phone_numbers:
-            add_job_for_number(number.id, number.monitoring_frequency, api_key)
-            
-        print(f"Monitoring {len(phone_numbers)} phone numbers")
+        query = db.query(PhoneNumber).filter(PhoneNumber.disabled == False)
+        if owner_id is not None:
+            query = query.filter(PhoneNumber.owner_id == owner_id)
+
+        scheduled = 0
+        numbers = query.order_by(PhoneNumber.owner_id).all()
+        for number_owner_id, group in groupby(numbers, key=attrgetter("owner_id")):
+            owned_numbers = list(group)
+            owner = db.get(User, number_owner_id) if number_owner_id is not None else None
+            if get_owner_api_key(number_owner_id, owner, len(owned_numbers)) is None:
+                continue
+            for number in owned_numbers:
+                add_job_for_number(number.id, number.monitoring_frequency)
+                scheduled += 1
+
+        logger.info("Monitoring %s phone numbers", scheduled)
+        return scheduled
     finally:
         db.close()
 
@@ -130,4 +155,4 @@ def init_monitoring():
     if not scheduler:
         scheduler = BackgroundScheduler()
         scheduler.start()
-        print("Monitoring scheduler initialized") 
+        logger.info("Monitoring scheduler initialized")

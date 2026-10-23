@@ -11,11 +11,10 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./caller_id.db"
     
     # API Keys
-    CALLER_API_KEY: str = ""
     CALLER_API_URL: str = "https://callerapi.com"
     
     # Security
-    SECRET_KEY: str = ""
+    SESSION_SECRET: str = ""
     
     # Templates
     TEMPLATES_DIR: Path = Path(__file__).parent.parent / "templates"
