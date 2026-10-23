@@ -1,17 +1,15 @@
-from fastapi import APIRouter, HTTPException, Request, Depends
+from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
-from app.services.caller_api import CallerAPIService
+from app.api.deps import (
+    LookupServiceFactory,
+    get_current_user,
+    get_db,
+    get_lookup_service_factory,
+    require_api_key,
+)
 from app.models.notifications import NotificationSettings
-from app.db.base import SessionLocal
+from app.models.user import User
 from pydantic import BaseModel
-
-# Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 # Pydantic model for request validation
 class NotificationSettingsUpdate(BaseModel):
@@ -31,28 +29,27 @@ class NotificationSettingsUpdate(BaseModel):
 router = APIRouter(prefix="/api/v1")
 
 @router.get("/me")
-async def get_account_info(request: Request):
-    api_key = request.session.get("api_key")
-    if not api_key:
-        raise HTTPException(status_code=401, detail="Not authenticated")
+def get_account_info(
+    current_user: User = Depends(get_current_user),
+    service_factory: LookupServiceFactory = Depends(get_lookup_service_factory),
+):
+    api_key = require_api_key(current_user)
     
     try:
-        service = CallerAPIService(api_key=api_key)
+        service = service_factory(api_key)
         account_info = service.get_account_info()
-        account_info["api_key"] = api_key  # Add API key from session to response
+        account_info["api_key"] = api_key  # The settings page shows the user's own key
         return account_info
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.post("/settings/notifications")
-async def save_notification_settings(
+def save_notification_settings(
     settings: NotificationSettingsUpdate,
-    request: Request,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
-    api_key = request.session.get("api_key")
-    if not api_key:
-        raise HTTPException(status_code=401, detail="Not authenticated")
+    api_key = require_api_key(current_user)
     
     # Get existing settings or create new
     db_settings = db.query(NotificationSettings).filter(
@@ -75,10 +72,11 @@ async def save_notification_settings(
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.get("/settings/notifications")
-async def get_notification_settings(request: Request, db: Session = Depends(get_db)):
-    api_key = request.session.get("api_key")
-    if not api_key:
-        raise HTTPException(status_code=401, detail="Not authenticated")
+def get_notification_settings(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    api_key = require_api_key(current_user)
     
     # Get settings from DB, return defaults if not found
     settings = db.query(NotificationSettings).filter(
@@ -88,4 +86,4 @@ async def get_notification_settings(request: Request, db: Session = Depends(get_
     if not settings:
         return NotificationSettingsUpdate().dict()
     
-    return settings 
+    return NotificationSettingsUpdate.model_validate(settings).dict()

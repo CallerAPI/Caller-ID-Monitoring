@@ -43,17 +43,22 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-5. Get your API key from https://callerapi.com/dashboard and add it to the `.env` file:
-```
-CALLER_API_KEY=your_api_key_here
+5. Set `SESSION_SECRET` in the `.env` file. Use a random value of at least 32 characters. The app does not start without it. To make a value, run:
+```bash
+python -c 'import secrets; print(secrets.token_urlsafe(48))'
 ```
 
-6. Run the application:
+6. Apply the database migrations:
+```bash
+alembic upgrade head
+```
+
+7. Run the application:
 ```bash
 uvicorn app.main:app --reload
 ```
 
-7. Open your browser and navigate to `http://localhost:8000`
+8. Open your browser and navigate to `http://localhost:8000`. Each user signs in with their own API key. The app keeps the numbers of each user separate and monitors them with the key of their owner.
 
 ## Project Structure
 
@@ -86,15 +91,22 @@ To run the development server with auto-reload:
 uvicorn app.main:app --reload
 ```
 
+To run the tests:
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
+
 ## Production Deployment
 
 For production deployment:
 
 1. Use a production-grade database (e.g., PostgreSQL)
-2. Set up proper environment variables
-3. Use a production ASGI server (e.g., Gunicorn with Uvicorn workers)
-4. Set up proper security measures (HTTPS, rate limiting, etc.)
-5. Configure proper logging
+2. Set up proper environment variables. `SESSION_SECRET` is required.
+3. Run `alembic upgrade head` before you start a new version
+4. Use a production ASGI server (e.g., Gunicorn with Uvicorn workers)
+5. Set up proper security measures (HTTPS, rate limiting, etc.)
+6. Configure proper logging
 
 Example production command:
 ```bash

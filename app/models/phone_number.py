@@ -1,16 +1,21 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Float, JSON
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Float, JSON, ForeignKey, UniqueConstraint
 from sqlalchemy.sql import func
 from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 from app.db.base import Base
+from app.models.user import User  # noqa: F401  registers the users table for the owner_id foreign key
 
 # SQLAlchemy Model
 class PhoneNumber(Base):
     __tablename__ = "phone_numbers"
+    __table_args__ = (
+        UniqueConstraint("owner_id", "number", name="uq_phone_numbers_owner_number"),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
-    number = Column(String, unique=True, index=True)
+    owner_id = Column(Integer, ForeignKey("users.id", name="fk_phone_numbers_owner_id_users"), nullable=True, index=True)
+    number = Column(String, index=True)
     description = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
